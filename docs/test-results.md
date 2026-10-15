@@ -1,27 +1,29 @@
-# Test Results
+# Wyniki testów
 
-Only tests that have actually been performed belong in this document. Keep expected values separate from measured observations.
+Ten dokument zawiera wyłącznie testy powiązane z funkcjami urządzenia, decyzjami projektowymi lub bezpieczeństwem. Nie zapisujemy tu każdego ćwiczenia edukacyjnego.
 
-## Test register
+## Status testów
 
-| ID | Test | Date | Expected result / acceptance criterion | Actual result | Status |
-|---|---|---|---|---|---|
-| T-001 | Measure Arduino UNO 5 V rail while USB-powered | Pending | A stable reading near the expected 5 V rail; exact acceptance range to be set after board/source are identified | Not measured | Pending |
+| ID | Test | Co ma potwierdzić | Status | Dowód |
+|---|---|---|---|---|
+| T-001 | Identyfikacja płytki GPS | Dokładne oznaczenia płytki, pinout oraz możliwość ustalenia toru zasilania/poziomów logicznych | W toku — potrzebne zdjęcia obu stron i pinów | Brak |
+| T-002 | Komunikacja GNSS przez UART | Otrzymywanie poprawnych komunikatów NMEA przy zgodnych poziomach elektrycznych | Nie rozpoczęto | Brak |
+| T-003 | Zapis/odczyt na microSD | Powtarzalny zapis i odczyt pliku testowego | Nie rozpoczęto | Brak; czytnik do wyboru |
+| T-004 | Interfejs ekranu | Poprawne wyświetlanie danych pozycji i podstawowego UI | Nie rozpoczęto | Brak |
+| T-005 | Budżet energetyczny | Pobór prądu i oszacowanie czasu pracy docelowej konfiguracji | Nie rozpoczęto | Brak |
+| T-006 | Pierwsza rewizja PCB | Kontrola zasilania, zwarć i interfejsów przed pełną integracją | Nie rozpoczęto | Brak; PCB nie zaprojektowano |
 
-## Test record template
+## Wymagany format wpisu po zakończeniu ważnego testu
 
-### T-XXX — Test name
+- **ID i nazwa:**
+- **Cel / wymaganie:**
+- **Konfiguracja:** wersje modułów, firmware, źródło zasilania i ustawienia.
+- **Procedura:** kroki pozwalające powtórzyć test.
+- **Oczekiwany wynik:**
+- **Wynik rzeczywisty:** wyłącznie faktycznie zaobserwowane dane.
+- **Kryterium zaliczenia:**
+- **Wynik:** zaliczony / niezaliczony / nierozstrzygnięty.
+- **Dowody:** log, zdjęcie, zrzut ekranu lub dane pomiarowe.
+- **Ograniczenia i uwagi:**
 
-- **Date:**
-- **Hardware revision / setup:**
-- **Purpose:**
-- **Equipment:**
-- **Procedure:**
-- **Expected result:**
-- **Measured result:**
-- **Pass/fail criteria:**
-- **Status:** Not run / Pass / Fail / Blocked
-- **Notes and limitations:**
-- **Related issue or design decision:**
-
-Do not enter expected readings in the measured-result field. Attach photos or scope/multimeter screenshots when they materially support the result.
+Nie wpisywać przewidywanych wartości w polu wyniku rzeczywistego.

@@ -1,47 +1,45 @@
-# Hardware Decisions and Rationale
+# Rejestr decyzji sprzętowych
 
-**Status:** Preliminary decision record. Items marked *open* are not final design choices.
+Ten plik zbiera decyzje, które wpływają na architekturę. Nie jest dziennikiem codziennych ćwiczeń.
 
-## D-001 — Use the Arduino UNO R3 for early bench exercises only
+## HD-001 — Arduino UNO jako platforma eksperymentalna
 
-**Status:** Accepted for prototyping; not selected as the final controller.
+**Status:** przyjęta tymczasowo.
 
-**Rationale:** It is already available and suitable for learning GPIO, ADC, UART, I²C, SPI, timing, and basic measurement. The ATmega328P has 32 KB Flash and 2 KB SRAM, so final suitability for offline-map rendering is not assumed. The map representation, display and storage approach need to be established before selecting the final controller.
+**Decyzja:** wykorzystać posiadane UNO do testów podstawowych obwodów, GPIO, UART i prototypów peryferiów. Nie zakładać, że będzie kontrolerem końcowym nawigacji.
 
-**Reference:** [Official Arduino UNO R3 documentation](https://docs.arduino.cc/hardware/uno-rev3/).
+**Uzasadnienie:** ATmega328P w UNO R3 ma 32 KB Flash i 2 KB SRAM. To bardzo mało dla obsługi ekranu i buforów mapowych. Ostateczny wybór trzeba oprzeć o format map, ekran, wymagania wydajnościowe i budżet energetyczny.
 
-## D-002 — Do not wire the GPS board until the breakout board is identified
+**Źródło:** [Arduino UNO R3 — oficjalna specyfikacja](https://docs.arduino.cc/resources/datasheets/A000066-datasheet.pdf).
 
-**Status:** Safety constraint accepted; identification open.
+## HD-002 — GPS bez zasilania do czasu identyfikacji breakout boardu
 
-**Rationale:** The inventory describes the board as NEO-7M-0-000 compatible, but does not establish the breakout's connector labels, supply input range, logic voltage, regulator, or level shifting. The electrical specifications of the GNSS module itself cannot automatically be applied to an unknown breakout board.
+**Status:** otwarta weryfikacja; zasada bezpieczeństwa obowiązuje.
 
-**Reference:** [u-blox NEO-7 series documentation](https://www.u-blox.com/en/product/neo-7-series) and [NEO-7 datasheet](https://content.u-blox.com/sites/default/files/products/documents/NEO-7_DataSheet_%28UBX-13003830%29.pdf).
+**Decyzja:** nie podłączać jeszcze modułu GPS do Arduino.
 
-## D-003 — Treat the available 16×2 LCDs as prototype/status displays, not as the final map display
+**Uzasadnienie:** oznaczenie „NEO-7M compatible” nie potwierdza, czy konkretna płytka ma regulator napięcia i konwertery poziomów logicznych. Dokumentacja samego modułu NEO-7M podaje zasilanie VCC 1,65–3,6 V; nie wolno automatycznie przenosić tych parametrów na gotową płytkę pośredniczącą ani zakładać tolerancji na sygnały 5 V.
 
-**Status:** Provisional.
+**Następny krok:** obejrzeć obie strony modułu i oznaczenia pinów, zidentyfikować dokładny model płytki, a następnie znaleźć dokumentację producenta lub wiarygodny schemat.
 
-**Rationale:** Character LCDs are useful for displaying text, GPS status, coordinates, and debugging information. They are not a suitable substitute for a graphical display when the requirement is to show a map.
+**Źródło:** [u-blox NEO-7 — datasheet](https://content.u-blox.com/sites/default/files/products/documents/NEO-7_DataSheet_%28UBX-13003830%29.pdf) i [strona serii NEO-7](https://www.u-blox.com/en/product/neo-7-series).
 
-## D-004 — Do not select the battery or power-conversion circuit yet
+## HD-003 — nie zamrażać jeszcze ekranu
 
-**Status:** Open.
+**Status:** otwarta.
 
-**Rationale:** The final controller, map display, storage device, GPS breakout, and target runtime have not been chosen or measured. Selecting the battery or regulators before estimating and measuring the load would be premature.
+**Decyzja:** używane LCD 16×2 i Grove RGB można wykorzystać do prób UI/diagnostyki, ale nie uznawać ich za docelowy ekran mapy.
 
-## D-005 — Keep optional modules out of the first working version unless they support a core requirement
+**Uzasadnienie:** interfejs, rozdzielczość, widoczność na zewnątrz, sterownik, RAM i pobór mocy muszą pasować do renderowania map.
 
-**Status:** Provisional.
+## HD-004 — nie wybierać jeszcze akumulatora
 
-**Rationale:** The HM-10 BLE module, PN532-compatible NFC board, servos, and motor-control hardware are available, but they do not appear necessary for core offline navigation. Keeping them out of the first prototype reduces wiring and power-budget complexity.
+**Status:** otwarta.
 
-## Open decisions
+**Decyzja:** najpierw oszacować i zmierzyć pobór prądu bloków, ustalić wymagany czas pracy i napięcia wszystkich elementów. Dopiero potem dobrać ogniwo, ładowanie, ochronę i przetwornice.
 
-- Final controller.
-- Graphical display and interface.
-- GPS breakout board and electrical levels.
-- Removable-storage hardware and map file format.
-- Battery, charger/protection, regulators, and low-battery handling.
-- Optional compass and heading strategy.
-- PCB connector choices, test points and debug access.
+## HD-005 — nie kupować czytnika microSD ani kompasu przed ustaleniem wymagań
+
+**Status:** otwarta.
+
+**Decyzja:** kupować dodatkowe moduły, gdy będą potrzebne do wybranego prototypu i znane będą wymagania elektryczne oraz interfejsy.

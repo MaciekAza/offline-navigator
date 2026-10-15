@@ -1,23 +1,20 @@
-# Troubleshooting and Known Issues
+# Diagnostyka problemów
 
-Record reproducible problems and their verified fixes. Do not record a suspected cause as fact until there is evidence.
+Dodajemy tu problemy, które zablokowały integrację albo wymagały konkretnej zmiany w schemacie, firmware, konfiguracji lub procedurze testowej. Proste potknięcia z ćwiczeń nie muszą trafiać do repozytorium.
 
-## Issue record template
+## Szablon wpisu
 
-### ISSUE-XXX — Short title
+### [ID] Krótki opis problemu
 
-- **Status:** Open / Investigating / Resolved
-- **Affected revision / setup:**
-- **Observed behavior:**
-- **Steps to reproduce:**
-- **Expected behavior:**
-- **Evidence:** logs, measurements, photos, or error messages
-- **Hypotheses:** clearly marked as unverified
-- **Tests performed:**
-- **Root cause:** only after verified
-- **Fix:**
-- **Regression test:**
+- **Objaw:**
+- **Warunki wystąpienia:**
+- **Hipotezy:**
+- **Testy diagnostyczne:**
+- **Przyczyna potwierdzona:**
+- **Rozwiązanie:**
+- **Jak zapobiec powtórzeniu:**
+- **Powiązany test / commit:**
 
-## Current issues
+## Zarejestrowane problemy
 
-No hardware fault has been confirmed yet. The exact GPS breakout-board identification remains an unresolved integration prerequisite, not a diagnosed fault.
+Na tym etapie nie zarejestrowano jeszcze problemu dotyczącego docelowego prototypu.
