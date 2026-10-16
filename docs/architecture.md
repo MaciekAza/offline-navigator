@@ -1,30 +1,51 @@
 # Architektura systemu
 
-## Cel
+**Status:** koncepcja; interfejsy i platforma docelowa nie zostały zatwierdzone.
 
-Przenośna nawigacja GNSS z mapami przechowywanymi lokalnie, zaprojektowana do pracy bez dostępu do internetu.
+## Główne bloki
+
+```mermaid
+flowchart LR
+    GNSS[Odbiornik GNSS] --> MCU[Kontroler docelowy]
+    MCU <--> SD[Karta microSD]
+    MCU <--> DISP[Ekran]
+    BTN[Przyciski] --> MCU
+    COMP[Kompas — opcjonalnie] <--> MCU
+    IMU[IMU / szacowanie ruchu — opcjonalnie] <--> MCU
+    BAT[Akumulator] --> PWR[Układ zasilania]
+    PWR --> MCU
+    PWR --> GNSS
+    PWR --> SD
+    PWR --> DISP
+```
+
+Diagram przedstawia wyłącznie docelowe funkcje blokowe. Nie jest schematem elektrycznym ani instrukcją połączeń.
 
 ## Bloki funkcjonalne
 
-1. **GNSS** — odbiór pozycji, czasu, prędkości i statusu fixa.
-2. **Mikrokontroler** — sterowanie urządzeniem, walidacja danych oraz logika nawigacji.
-3. **Mapa offline** — dane mapowe zapisane lokalnie i przygotowane przed użyciem urządzenia.
-4. **Ekran i interfejs** — prezentowanie mapy, pozycji, statusu GNSS i menu obsługi.
-5. **Pamięć masowa** — karta microSD do map, punktów i śladów, zależnie od przyjętej architektury.
-6. **Wejście użytkownika** — przyciski, a ewentualnie także enkoder.
-7. **Zasilanie** — akumulator, ładowanie, zabezpieczenia i stabilizacja napięć.
-8. **Opcjonalne czujniki** — kompas i/lub IMU do wspomagania orientacji w ograniczonym zakresie, jeśli testy wykażą sens takiego rozwiązania.
+| Blok | Rola | Status |
+|---|---|---|
+| GNSS | Pozycja, czas, prędkość i dane nawigacyjne | Moduł wstępnie opisany jako zgodny z NEO-7M; płytka i pinout do weryfikacji |
+| Kontroler | Parsowanie danych GNSS, obsługa pamięci i interfejsu, renderowanie map | Nie wybrano platformy docelowej |
+| Pamięć microSD | Lokalne mapy, punkty i zapis śladów | Czytnik niepotwierdzony w dostępnych komponentach |
+| Ekran | Mapa i interfejs użytkownika | Dostępne LCD 16×2 i Grove LCD RGB; ekran mapowy do wyboru |
+| Przyciski | Obsługa widoków i funkcji | Kilka przycisków THT dostępnych |
+| Zasilanie | Konwersja napięć, zabezpieczenia i ładowanie | Architektura do zaprojektowania; brak potwierdzonego zestawu akumulatorowego |
+| Kompas | Kierunek urządzenia, pomocniczo przy utracie GNSS | Funkcja opcjonalna, brak potwierdzonego modułu |
+| IMU / dead reckoning | Krótkotrwałe szacowanie ruchu przy przerwanym GNSS | Koncepcja; dodatkowy sprzęt i ograniczenia do oceny |
 
-## Aktualny prototyp
+## Decyzje, które trzeba podjąć przed projektem PCB
 
-Arduino UNO R3 komunikuje się z modułem opisanym NEO-7M-0-000 compatible. Odebrano komunikaty NMEA, a następnie zaobserwowano fix 3D na otwartej przestrzeni. Nie napisano jeszcze docelowego parsera ani interfejsu użytkownika.
+1. Wymagany obszar i szczegółowość map oraz format danych.
+2. Wymagana rozdzielczość i przekątna ekranu.
+3. Wybór kontrolera na podstawie RAM, Flash, interfejsów, wydajności i zużycia energii.
+4. Wybór czytnika microSD i interfejsu komunikacyjnego.
+5. Schemat zasilania, źródło energii, ładowanie i zabezpieczenia.
+6. Złącza, sposób programowania, debugowania i aktualizacji firmware.
 
-## Decyzje otwarte
+Nie zamrażaj projektu PCB, dopóki te decyzje nie będą uzasadnione.
 
-- Docelowy mikrokontroler, pamięć RAM/Flash i sposób renderowania map.
-- Format map offline oraz narzędzie do ich przygotowania.
-- Rodzaj i rozdzielczość ekranu.
-- Czy obecny GNSS i antena spełniają wymagania terenowe.
-- Czy wymagany jest kompas/IMU i w jaki sposób sygnalizować tryb szacowanej pozycji.
-- Architektura zasilania, akumulator i docelowy czas pracy.
-- Interfejs karty microSD i organizacja przechowywanych danych.
+
+## Wymaganie pracy przy słabym sygnale GNSS
+
+Docelowo urządzenie ma być możliwie odporne na słaby odbiór w lesie i w pobliżu budynków. To wymaganie nie oznacza gwarancji fixa w pomieszczeniu: ściany, dachy i gęsta roślinność mogą blokować sygnał satelitarny. Rozważymy odbiornik wielokonstelacyjny oraz odpowiednią antenę i jej umiejscowienie. Przy utracie fixa interfejs powinien wyraźnie pokazywać brak aktualnej pozycji, zachować ostatnią znaną pozycję/ślad i — jeśli analiza potwierdzi sens — oferować krótkotrwałe przybliżenie ruchu z kompasu/IMU, z komunikatem o narastającej niepewności.

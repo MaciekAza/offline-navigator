@@ -1,5 +1,3 @@
 # Zdjęcia prototypu
 
-Dodawaj wybrane zdjęcia, które dokumentują istotny etap sprzętowy: zmontowany prototyp, ekran działającego urządzenia, rewizję PCB lub stanowisko testowe. Nie trzeba archiwizować każdego zdjęcia roboczego.
-
-Przy zdjęciu opisz w README, co przedstawia, jaki test dokumentuje i z jaką rewizją sprzętu/firmware jest powiązane.
+Dodawaj zdjęcia istotnych kamieni milowych sprzętowych: czytelne ujęcia prototypu, połączeń oraz gotowej PCB/obudowy. Przed publikacją sprawdź, czy zdjęcia nie ujawniają dokładnej prywatnej lokalizacji, numerów seryjnych ani innych danych wrażliwych.

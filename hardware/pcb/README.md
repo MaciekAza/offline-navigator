@@ -1,3 +1,3 @@
-# PCB
+# Projekt PCB
 
-Tutaj znajdą się projekty PCB KiCad, pliki produkcyjne Gerber/drill oraz widoki płytki. Płytka nie została jeszcze zaprojektowana.
+Docelowy projekt PCB zostanie dodany po podjęciu decyzji o kontrolerze, ekranie, GNSS, microSD oraz zasilaniu. Katalog powinien zawierać projekt KiCad, reguły/ustalenia produkcyjne i pliki produkcyjne dla konkretnych rewizji. Każda rewizja powinna mieć numer oraz status prototypu.

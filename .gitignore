@@ -1,18 +1,26 @@
-# Arduino IDE / local build artifacts
-build/
-*.elf
-*.hex
-*.map
-*.o
-*.d
-
-# KiCad temporary / lock files
-*-backups/
-*_autosave-*
-*.lck
-
-# Operating system / editor
+# System / edytory
 .DS_Store
 Thumbs.db
+Desktop.ini
 .vscode/
 .idea/
+
+# Arduino / C-C++ — pliki generowane lokalnie
+build/
+cmake-build-*/
+*.elf
+*.hex
+*.eep
+*.map
+*.o
+*.a
+*.d
+*.tmp
+
+# PlatformIO, jeśli będzie używane
+.pio/
+
+# KiCad — blokady i kopie zapasowe; pliki projektu i źródła pozostają w repo
+*-backups/
+*.lck
+fp-info-cache

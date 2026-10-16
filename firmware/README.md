@@ -1,12 +1,6 @@
 # Firmware
 
-Kod źródłowy urządzenia i małych testów integracyjnych będzie przechowywany w tym katalogu.
+- `gnss_parser/` — parser TinyGPSPlus z filtrowaniem pozycji i krótkim raportem `FIX/LAT/LON`.
+- `diagnostics/gps_uart_raw/` — minimalny szkic do sprawdzania samego odbioru surowych NMEA przed uruchomieniem parsera.
 
-## Zasady
-
-- Każdy test sprzętowy opisuje, jakie płytki i wersje bibliotek obsługuje.
-- W kodzie nie wpisujemy niezweryfikowanych pinów modułów.
-- Dodajemy instrukcję kompilacji i uruchomienia do każdego istotnego przykładu.
-- Nie publikujemy logów, kluczy ani danych prywatnych.
-
-Pierwszy szkic zostanie dodany po zidentyfikowaniu modułu, który ma być testowany.
+Każdy istotny szkic ma własny README z zależnościami, pinami, ustawieniami UART i interpretacją wyników. Nie umieszczaj w publicznym repozytorium dokładnych współrzędnych z prywatnych lokalizacji.

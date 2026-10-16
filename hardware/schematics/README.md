@@ -1,3 +1,3 @@
-# Schematy
+# Schematy elektroniczne
 
-Umieszczaj tutaj źródłowe projekty schematów KiCad i eksporty PDF/PNG, kiedy powstaną. Na tym etapie nie ma jeszcze zatwierdzonego schematu docelowego urządzenia.
+W tym katalogu będą przechowywane źródłowe projekty schematów (np. KiCad) oraz wyeksportowane pliki PDF do przeglądu. Nie umieszczaj tutaj schematów uznanych za zatwierdzone, dopóki nie zweryfikowano pinoutów, napięć, prądów i dokumentacji elementów.

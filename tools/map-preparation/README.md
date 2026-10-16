@@ -1,3 +1,3 @@
 # Przygotowanie map offline
 
-Miejsce na narzędzia i dokumentację procesu przygotowania danych OpenStreetMap do przechowywania lokalnego. Format danych i docelowa platforma sprzętowa nie zostały jeszcze wybrane.
+Docelowo będą tu narzędzia i instrukcje do przygotowania lokalnego fragmentu danych OpenStreetMap do formatu obsługiwanego przez wybraną platformę. Zanim powstanie kod, trzeba ustalić docelowy kontroler, ekran, pamięć i format map. Nie umieszczaj w repozytorium pobranych dużych zbiorów danych bez sprawdzenia rozmiaru i warunków licencyjnych.

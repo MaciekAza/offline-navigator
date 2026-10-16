@@ -1,31 +1,47 @@
-# Decyzje sprzętowe
+# Rejestr decyzji sprzętowych
 
-## H-001 — Arduino UNO do testów, niezatwierdzone jako platforma końcowa
+Ten dokument zawiera decyzje wpływające na architekturę urządzenia, nie dziennik codziennych ćwiczeń.
 
-**Status:** tymczasowe.
+## HD-001 — Arduino UNO jako platforma eksperymentalna
 
-UNO jest dostępne i nadaje się do nauki komunikacji z GNSS oraz prostych testów. ATmega328P ma ograniczone zasoby pamięci (32 KB Flash i 2 KB SRAM), więc nie zakładamy, że wystarczy do docelowego renderowania map offline. Wybór platformy końcowej nastąpi po ustaleniu wymagań mapy, ekranu, pamięci i poboru energii.
+**Status:** przyjęta tymczasowo.
 
-## H-002 — NEO-7M jako moduł prototypowy
+**Decyzja:** używać posiadanego UNO do testów GPIO, UART, peryferiów i podstaw firmware. Nie uznawać go za docelowy kontroler map offline.
 
-**Status:** tymczasowe.
+**Uzasadnienie:** ATmega328P w UNO R3 ma 32 KB Flash i 2 KB SRAM, co jest poważnym ograniczeniem przy renderowaniu map i buforowaniu danych. Ostateczny wybór musi wynikać z formatu map, ekranu, interfejsów i budżetu energetycznego.
 
-Moduł oznaczony NEO-7M-0-000 compatible przesyłał komunikaty NMEA, a podczas testu na otwartej przestrzeni uzyskał fix 3D. Nie ustalono jeszcze pełnych parametrów płytki pośredniczącej ani jej tolerancji wejścia RX. Nie należy traktować samego oznaczenia układu GNSS jako dowodu, że gotowa płytka może bezpiecznie przyjmować każde napięcie.
+**Dokumentacja:** [Arduino UNO R3 — oficjalna specyfikacja](https://docs.arduino.cc/hardware/uno-rev3/).
 
-## H-003 — dobra dostępność pozycji w trudnych warunkach
+## HD-002 — obecny moduł GNSS jest platformą do testów, nie finalnym wyborem
 
-**Status:** wymaganie projektowe, do walidacji.
+**Status:** tymczasowo przyjęta.
 
-Docelowo należy dążyć do możliwie dobrego odbioru w gęstym lesie i w pobliżu budynków. Rozważyć i porównać wielosystemowy odbiornik GNSS, właściwą antenę, jej położenie oraz parametry toru RF. GNSS może jednak nie ustalić pozycji w budynku lub przy całkowitym zasłonięciu nieba. Urządzenie musi wtedy poprawnie oznaczać brak aktualnego fixa, a nie przedstawiać starej pozycji jako bieżącej.
+**Potwierdzone z opisu i testów:** odbiornik na płytce oznaczonej `NEO-7M-0-000 compatible`; wyprowadzenia opisane jako PPS/RX/TX/GND/VCC; Arduino odbiera NMEA z GPS TX podłączonego do D4.
 
-Ewentualny kompas/IMU może wspierać orientację lub krótkotrwałe szacowanie ruchu, ale nie jest bezbłędnym zamiennikiem GNSS. Taki tryb wymaga osobnej walidacji i jawnego oznaczenia niepewności.
+**Niepotwierdzone:** dokładna wersja płytki pośredniczącej, model i typ anteny, zakres wejścia VCC całej płytki oraz odporność RX na poziom 5 V. W testach zachowano działającą konfigurację zasilania, ale nie wolno na tej podstawie automatycznie przenosić tego połączenia na inną płytkę.
 
-## H-004 — kod będzie pisany etapami wspólnie z użytkownikiem
+**Wyniki:** fix 3D uzyskano na otwartej przestrzeni. Późniejsze próbki raportowały 5–6 satelitów użytych i HDOP ok. 1,49–1,50. Dokładność bezwzględna nie została zmierzona.
 
-**Status:** aktywne założenie procesu.
+**Decyzja:** korzystać z NEO-7M w prototypie do nauki UART/NMEA; przed finalną PCB porównać współczesne wielokonstelacyjne odbiorniki, anteny, wymagania zasilania, pobór energii i dostępność dokumentacji.
 
-Plik `firmware/gnss_parser/gnss_parser.ino` pozostawiono pusty celowo. Użytkownik chce samodzielnie napisać firmware, krok po kroku z pomocą asystenta, zamiast otrzymać gotowy program.
+**Dokumentacja:** [u-blox NEO-7 series](https://www.u-blox.com/en/product/neo-7-series), [u-blox M10 series](https://www.u-blox.com/en/product/ubx-m10-series).
 
-## Zasady zatwierdzania decyzji
+## HD-003 — odbiór w trudnych warunkach
 
-Decyzję oznaczamy jako zatwierdzoną dopiero wtedy, gdy ma podstawę w dokumentacji, obliczeniu, pomiarze lub teście. W przeciwnym razie powinna pozostać jawnie oznaczona jako tymczasowa.
+**Status:** wymaganie projektowe przyjęte; realizacja sprzętowa otwarta.
+
+**Wymaganie:** maksymalizować dostępność i stabilność pozycji w gęstym lesie oraz w pobliżu budynków. Nie gwarantujemy fixa wewnątrz dowolnego budynku ani pod każdą koroną drzew.
+
+**Kierunek:** porównać nowoczesny odbiornik wielokonstelacyjny, właściwą antenę/umiejscowienie i zakłócenia generowane przez resztę płytki. UI powinien jawnie sygnalizować brak aktualnej pozycji. Kompas/IMU można ocenić jako pomocniczy fallback, z narastającą niepewnością.
+
+## HD-004 — ekran pozostaje niezdecydowany
+
+**Status:** otwarta.
+
+Dostępne LCD 16×2 i Grove RGB można wykorzystać do komunikatów diagnostycznych, ale nie zostały wybrane jako ekran mapy. Wybór finalny zależy od widoczności w słońcu, rozdzielczości, interfejsu, sterownika, pamięci i poboru mocy.
+
+## HD-005 — zasilanie i microSD bez decyzji zakupowej
+
+**Status:** otwarta.
+
+Przed wyborem akumulatora trzeba zmierzyć/ oszacować pobór prądu bloków, ustalić wymagany czas pracy, napięcia i układ ładowania/ochrony. Czytnik microSD nie został jeszcze potwierdzony; dodatkowe elementy kupować dopiero po zdefiniowaniu wymagań.
