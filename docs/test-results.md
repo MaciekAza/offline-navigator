@@ -1,29 +1,37 @@
 # Wyniki testów
 
-Ten dokument zawiera wyłącznie testy powiązane z funkcjami urządzenia, decyzjami projektowymi lub bezpieczeństwem. Nie zapisujemy tu każdego ćwiczenia edukacyjnego.
+Ten plik zbiera tylko testy istotne dla działania urządzenia. Nie jest dziennikiem każdej czynności ani miejscem na niezweryfikowane przewidywania.
 
-## Status testów
+## T-GNSS-001 — odbiór surowych komunikatów NMEA
 
-| ID | Test | Co ma potwierdzić | Status | Dowód |
-|---|---|---|---|---|
-| T-001 | Identyfikacja płytki GPS | Dokładne oznaczenia płytki, pinout oraz możliwość ustalenia toru zasilania/poziomów logicznych | W toku — potrzebne zdjęcia obu stron i pinów | Brak |
-| T-002 | Komunikacja GNSS przez UART | Otrzymywanie poprawnych komunikatów NMEA przy zgodnych poziomach elektrycznych | Nie rozpoczęto | Brak |
-| T-003 | Zapis/odczyt na microSD | Powtarzalny zapis i odczyt pliku testowego | Nie rozpoczęto | Brak; czytnik do wyboru |
-| T-004 | Interfejs ekranu | Poprawne wyświetlanie danych pozycji i podstawowego UI | Nie rozpoczęto | Brak |
-| T-005 | Budżet energetyczny | Pobór prądu i oszacowanie czasu pracy docelowej konfiguracji | Nie rozpoczęto | Brak |
-| T-006 | Pierwsza rewizja PCB | Kontrola zasilania, zwarć i interfejsów przed pełną integracją | Nie rozpoczęto | Brak; PCB nie zaprojektowano |
+**Status:** zaliczony w zakresie komunikacji szeregowej.
 
-## Wymagany format wpisu po zakończeniu ważnego testu
+- Moduł: NEO-7M-0-000 compatible.
+- Platforma: Arduino UNO R3.
+- Wynik: odbierano czytelne zdania NMEA, m.in. GGA, GSA, GSV, GLL, RMC i VTG.
+- Ograniczenie: sam odbiór NMEA nie potwierdza posiadania fixa.
 
-- **ID i nazwa:**
-- **Cel / wymaganie:**
-- **Konfiguracja:** wersje modułów, firmware, źródło zasilania i ustawienia.
-- **Procedura:** kroki pozwalające powtórzyć test.
-- **Oczekiwany wynik:**
-- **Wynik rzeczywisty:** wyłącznie faktycznie zaobserwowane dane.
-- **Kryterium zaliczenia:**
-- **Wynik:** zaliczony / niezaliczony / nierozstrzygnięty.
-- **Dowody:** log, zdjęcie, zrzut ekranu lub dane pomiarowe.
-- **Ograniczenia i uwagi:**
+## T-GNSS-002 — brak fixa wewnątrz budynku
 
-Nie wpisywać przewidywanych wartości w polu wyniku rzeczywistego.
+**Status:** zaobserwowany wynik; test nie stanowi diagnozy uszkodzenia.
+
+- GSV raportowało 4 satelity w komunikacie.
+- GGA: jakość pozycji `0`, 0 satelitów użytych, HDOP `99.99`.
+- GSA: typ fixa `1` (brak fixa).
+- RMC/GLL: status nieważny (`V`).
+- Wniosek: odbiornik raportował satelity, ale nie wyznaczał pozycji w tych warunkach.
+
+## T-GNSS-003 — fix na otwartej przestrzeni
+
+**Status:** zaliczony dla uzyskania fixa; dokładność niezweryfikowana.
+
+- GGA quality `1`; GSA fix type `3`; RMC/GLL status `A`.
+- W pierwszej zapisanej próbce: 4 satelity użyte, HDOP około `10.42`, PDOP około `15.30`, VDOP około `11.20`.
+- Po około 3 minutach w kolejnej próbie: 6 satelitów użytych, 9 raportowanych w GSV, HDOP `1.98`, PDOP `2.51`, VDOP `1.54`.
+- Wniosek: odbiornik uzyskał autonomiczny fix 3D na zewnątrz, a pod koniec dłuższej próby raportował korzystniejsze DOP.
+- Ograniczenie: DOP nie jest bezpośrednim błędem w metrach. Nie przeprowadzono porównania z niezależnym punktem odniesienia.
+- Prywatność: dokładnych współrzędnych z logu nie przechowujemy w portfolio.
+
+## Następny sensowny test
+
+Napisać własny parser NMEA, który raportuje status i świeżość fixa, współrzędne, liczbę satelitów oraz HDOP. Następnie przetestować go na otwartej przestrzeni i sprawdzić zachowanie w razie utraty sygnału.

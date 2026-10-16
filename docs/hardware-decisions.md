@@ -1,45 +1,31 @@
-# Rejestr decyzji sprzętowych
+# Decyzje sprzętowe
 
-Ten plik zbiera decyzje, które wpływają na architekturę. Nie jest dziennikiem codziennych ćwiczeń.
+## H-001 — Arduino UNO do testów, niezatwierdzone jako platforma końcowa
 
-## HD-001 — Arduino UNO jako platforma eksperymentalna
+**Status:** tymczasowe.
 
-**Status:** przyjęta tymczasowo.
+UNO jest dostępne i nadaje się do nauki komunikacji z GNSS oraz prostych testów. ATmega328P ma ograniczone zasoby pamięci (32 KB Flash i 2 KB SRAM), więc nie zakładamy, że wystarczy do docelowego renderowania map offline. Wybór platformy końcowej nastąpi po ustaleniu wymagań mapy, ekranu, pamięci i poboru energii.
 
-**Decyzja:** wykorzystać posiadane UNO do testów podstawowych obwodów, GPIO, UART i prototypów peryferiów. Nie zakładać, że będzie kontrolerem końcowym nawigacji.
+## H-002 — NEO-7M jako moduł prototypowy
 
-**Uzasadnienie:** ATmega328P w UNO R3 ma 32 KB Flash i 2 KB SRAM. To bardzo mało dla obsługi ekranu i buforów mapowych. Ostateczny wybór trzeba oprzeć o format map, ekran, wymagania wydajnościowe i budżet energetyczny.
+**Status:** tymczasowe.
 
-**Źródło:** [Arduino UNO R3 — oficjalna specyfikacja](https://docs.arduino.cc/resources/datasheets/A000066-datasheet.pdf).
+Moduł oznaczony NEO-7M-0-000 compatible przesyłał komunikaty NMEA, a podczas testu na otwartej przestrzeni uzyskał fix 3D. Nie ustalono jeszcze pełnych parametrów płytki pośredniczącej ani jej tolerancji wejścia RX. Nie należy traktować samego oznaczenia układu GNSS jako dowodu, że gotowa płytka może bezpiecznie przyjmować każde napięcie.
 
-## HD-002 — GPS bez zasilania do czasu identyfikacji breakout boardu
+## H-003 — dobra dostępność pozycji w trudnych warunkach
 
-**Status:** otwarta weryfikacja; zasada bezpieczeństwa obowiązuje.
+**Status:** wymaganie projektowe, do walidacji.
 
-**Decyzja:** nie podłączać jeszcze modułu GPS do Arduino.
+Docelowo należy dążyć do możliwie dobrego odbioru w gęstym lesie i w pobliżu budynków. Rozważyć i porównać wielosystemowy odbiornik GNSS, właściwą antenę, jej położenie oraz parametry toru RF. GNSS może jednak nie ustalić pozycji w budynku lub przy całkowitym zasłonięciu nieba. Urządzenie musi wtedy poprawnie oznaczać brak aktualnego fixa, a nie przedstawiać starej pozycji jako bieżącej.
 
-**Uzasadnienie:** oznaczenie „NEO-7M compatible” nie potwierdza, czy konkretna płytka ma regulator napięcia i konwertery poziomów logicznych. Dokumentacja samego modułu NEO-7M podaje zasilanie VCC 1,65–3,6 V; nie wolno automatycznie przenosić tych parametrów na gotową płytkę pośredniczącą ani zakładać tolerancji na sygnały 5 V.
+Ewentualny kompas/IMU może wspierać orientację lub krótkotrwałe szacowanie ruchu, ale nie jest bezbłędnym zamiennikiem GNSS. Taki tryb wymaga osobnej walidacji i jawnego oznaczenia niepewności.
 
-**Następny krok:** obejrzeć obie strony modułu i oznaczenia pinów, zidentyfikować dokładny model płytki, a następnie znaleźć dokumentację producenta lub wiarygodny schemat.
+## H-004 — kod będzie pisany etapami wspólnie z użytkownikiem
 
-**Źródło:** [u-blox NEO-7 — datasheet](https://content.u-blox.com/sites/default/files/products/documents/NEO-7_DataSheet_%28UBX-13003830%29.pdf) i [strona serii NEO-7](https://www.u-blox.com/en/product/neo-7-series).
+**Status:** aktywne założenie procesu.
 
-## HD-003 — nie zamrażać jeszcze ekranu
+Plik `firmware/gnss_parser/gnss_parser.ino` pozostawiono pusty celowo. Użytkownik chce samodzielnie napisać firmware, krok po kroku z pomocą asystenta, zamiast otrzymać gotowy program.
 
-**Status:** otwarta.
+## Zasady zatwierdzania decyzji
 
-**Decyzja:** używane LCD 16×2 i Grove RGB można wykorzystać do prób UI/diagnostyki, ale nie uznawać ich za docelowy ekran mapy.
-
-**Uzasadnienie:** interfejs, rozdzielczość, widoczność na zewnątrz, sterownik, RAM i pobór mocy muszą pasować do renderowania map.
-
-## HD-004 — nie wybierać jeszcze akumulatora
-
-**Status:** otwarta.
-
-**Decyzja:** najpierw oszacować i zmierzyć pobór prądu bloków, ustalić wymagany czas pracy i napięcia wszystkich elementów. Dopiero potem dobrać ogniwo, ładowanie, ochronę i przetwornice.
-
-## HD-005 — nie kupować czytnika microSD ani kompasu przed ustaleniem wymagań
-
-**Status:** otwarta.
-
-**Decyzja:** kupować dodatkowe moduły, gdy będą potrzebne do wybranego prototypu i znane będą wymagania elektryczne oraz interfejsy.
+Decyzję oznaczamy jako zatwierdzoną dopiero wtedy, gdy ma podstawę w dokumentacji, obliczeniu, pomiarze lub teście. W przeciwnym razie powinna pozostać jawnie oznaczona jako tymczasowa.

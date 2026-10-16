@@ -1,85 +1,44 @@
 # Offline Navigator
 
-**Portablena nawigacja GPS z mapami offline — projekt sprzętowo-programistyczny**
+Projekt przenośnej nawigacji GPS działającej bez internetu. Celem jest zaprojektowanie urządzenia obejmującego odbiornik GNSS, lokalne mapy OpenStreetMap, ekran, obsługę przycisków, zapis punktów i śladów na karcie microSD oraz zasilanie akumulatorowe. Projekt ma również obejmować własny schemat i płytkę PCB zaprojektowane w KiCad.
 
-> **Status:** planowanie i weryfikacja komponentów. Nie ma jeszcze potwierdzonego, działającego prototypu.
+> **Status: prototypowanie i nauka projektowania sprzętu.** Odbiór komunikatów NMEA z modułu NEO-7M i uzyskanie pierwszego fixa na otwartej przestrzeni zostały potwierdzone w testach. Firmware nawigacji nie został jeszcze napisany.
 
-## Cel projektu
+## Cele projektu
 
-Zaprojektować przenośne urządzenie, które działa bez dostępu do internetu i potrafi odczytać pozycję GNSS, wyświetlać mapę przechowywaną lokalnie oraz zapisywać punkty i ślady trasy. Projekt obejmuje firmware, elektronikę, własną płytkę PCB i testy kompletnego urządzenia.
+- [x] Zidentyfikować podstawowe wyposażenie i rozpocząć weryfikację modułu GNSS.
+- [x] Odebrać surowe komunikaty NMEA z odbiornika GPS przez Arduino UNO.
+- [x] Potwierdzić fix 3D na otwartej przestrzeni w teście prototypowym.
+- [ ] Napisać własny parser danych GNSS i raport diagnostyczny.
+- [ ] Zmierzyć stabilność pozycji i opisać ograniczenia obecnego odbiornika.
+- [ ] Zdecydować o docelowym mikrokontrolerze i ekranie dla map offline.
+- [ ] Dodać odczyt mapy offline, obsługę ekranu i nawigację po menu.
+- [ ] Dodać zapis punktów i śladów na microSD.
+- [ ] Zaprojektować układ zasilania i ocenić czas pracy z akumulatora.
+- [ ] Przygotować schemat oraz PCB w KiCad.
+- [ ] Zbudować obudowę i przeprowadzić testy końcowe.
 
-## Planowane funkcje
+## Aktualne stanowisko prototypowe
 
-- [ ] Odczyt pozycji z odbiornika GNSS.
-- [ ] Wyświetlanie pozycji na lokalnych danych mapowych opartych na OpenStreetMap.
-- [ ] Zapisywanie i odczytywanie punktów oraz śladów trasy.
-- [ ] Obsługa karty microSD.
-- [ ] Ekran i przyciski do obsługi urządzenia.
-- [ ] Zasilanie akumulatorowe z kontrolą poboru energii.
-- [ ] Schemat i PCB zaprojektowane w KiCad.
-- [ ] Obudowa oraz testy końcowe.
+- Arduino UNO R3 z ATmega328P-PU
+- Moduł GNSS oznaczony NEO-7M-0-000 compatible
+- Odbiór danych GPS przez UART/SoftwareSerial podczas testu
+- Pozostałe dostępne komponenty wymieniono w [inwentaryzacji sprzętu](docs/hardware-inventory.md)
 
-Lista opisuje **cele**, a nie ukończone funkcje. Checkboxy będą zmieniane dopiero po weryfikacji danego elementu.
+Arduino UNO służy obecnie do nauki i testów komunikacji. Nie jest jeszcze zatwierdzony jako docelowa platforma dla renderowania map offline. Przed wyborem finalnego mikrokontrolera należy określić format map, wymagania ekranu, pamięć potrzebną na dane oraz budżet energetyczny.
 
-## Aktualny stan
+## Wymaganie dotyczące odbioru w trudnych warunkach
 
-- Zebrano wstępny spis dostępnych komponentów: [`docs/hardware-inventory.md`](docs/hardware-inventory.md).
-- Architektura urządzenia jest koncepcyjna; nie wybrano jeszcze docelowego mikrokontrolera, ekranu ani toru zasilania.
-- Moduł GPS jest opisywany jako zgodny z NEO-7M, ale jego konkretna płytka pośrednicząca, pinout i dopuszczalne poziomy logiczne nie zostały potwierdzone.
-- Nie ma jeszcze wyników testów działającego prototypu.
+Celem projektu jest możliwie dobra dostępność pozycji w gęstym lesie oraz w pobliżu i wewnątrz budynków. Będzie to wymaganie do sprawdzenia w porównywalnych testach, a nie obietnica stałego fixa GPS. Jeśli sygnał GNSS będzie niedostępny, urządzenie powinno jasno sygnalizować utratę fixa. Można później ocenić dodatkowe źródła informacji, takie jak kompas i IMU, pamiętając, że estymacja ruchu bez GNSS narasta błędem.
 
-## Ważne założenia techniczne
+## Dokumentacja
 
-Arduino UNO R3 będzie na początku platformą do krótkich eksperymentów z elektroniką i interfejsami. Nie zakładamy, że stanie się kontrolerem końcowym nawigacji. Ma ATmega328P z 32 KB Flash i 2 KB SRAM, co mocno ogranicza możliwość pracy z mapami i buforami obrazu. Ostateczny wybór platformy nastąpi po oszacowaniu wymagań map, ekranu, pamięci i poboru energii.
+- [Architektura](docs/architecture.md)
+- [Inwentaryzacja sprzętu](docs/hardware-inventory.md)
+- [Decyzje sprzętowe](docs/hardware-decisions.md)
+- [Wyniki testów](docs/test-results.md)
+- [Rozwiązywanie problemów](docs/troubleshooting.md)
 
-Nieznanych modułów nie podłączamy, dopóki nie zweryfikujemy ich wersji, zasilania, pinoutu oraz poziomów logicznych.
+## Zasada dokumentowania
 
-## Kamienie milowe
-
-1. **Weryfikacja komponentów i wymagań** — rozpoznanie modułów, potwierdzenie pinoutów i ograniczeń elektrycznych.
-2. **Prototyp GNSS** — odczyt i walidacja komunikatów pozycji.
-3. **Pamięć danych** — zapis i odczyt punktów oraz śladów na microSD.
-4. **Interfejs użytkownika** — ekran, przyciski i podstawowe widoki.
-5. **Obsługa map offline** — wybór formatu danych, przygotowanie map i renderowanie.
-6. **Architektura zasilania** — budżet energetyczny, dobór akumulatora i regulatorów.
-7. **Integracja i PCB** — schemat, layout, prototyp płytki i kontrolowane uruchomienie.
-8. **Obudowa i walidacja** — testy funkcjonalne, energetyczne i terenowe.
-
-Kamienie milowe mogą zostać podzielone lub zmienione po testach i analizie ograniczeń sprzętu.
-
-## Struktura repozytorium
-
-```text
-offline-navigator/
-├── README.md
-├── docs/
-│   ├── architecture.md
-│   ├── hardware-inventory.md
-│   ├── hardware-decisions.md
-│   ├── test-results.md
-│   └── troubleshooting.md
-├── firmware/
-├── hardware/
-│   ├── schematics/
-│   ├── pcb/
-│   └── datasheets/
-├── images/
-│   └── prototype/
-└── tools/
-    └── map-preparation/
-```
-
-## Standard dowodów
-
-Status funkcji lub testu oznaczamy jako ukończony tylko wtedy, gdy istnieje sprawdzalny dowód: kod, schemat, nagranie/zdjęcie działającego prototypu, powtarzalna procedura lub zapis rzeczywistego pomiaru. Obliczenia i przewidywania opisujemy oddzielnie od wyników zmierzonych.
-
-## Technologie i narzędzia
-
-- C/C++ i platforma mikrokontrolerowa — do ustalenia na podstawie wymagań.
-- KiCad — schemat i PCB.
-- OpenStreetMap — źródło danych mapowych; format i proces przygotowania danych zostaną wybrane później.
-- Git i GitHub — wersjonowanie projektu oraz prezentacja końcowych artefaktów technicznych.
-
-## Licencja
-
-Licencja projektu nie została jeszcze wybrana. Przed publicznym udostępnieniem kodu, dokumentacji i projektu PCB należy określić, na jakich zasadach inni mogą z nich korzystać.
+Repozytorium jest portfolio projektu, a nie dziennikiem każdej lekcji. Trafiają tu istotne decyzje, kod, schematy, wyniki testów bloków urządzenia i problemy, których rozwiązanie wpływa na projekt. Wyniki pomiarów należy opisywać jako rzeczywiste tylko wtedy, gdy zostały wykonane i zapisane.

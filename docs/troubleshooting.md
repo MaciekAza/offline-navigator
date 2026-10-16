@@ -1,20 +1,20 @@
-# Diagnostyka problemów
+# Rozwiązywanie problemów
 
-Dodajemy tu problemy, które zablokowały integrację albo wymagały konkretnej zmiany w schemacie, firmware, konfiguracji lub procedurze testowej. Proste potknięcia z ćwiczeń nie muszą trafiać do repozytorium.
+Dokumentuj problemy, które wpłynęły na działanie urządzenia lub wymagały diagnozy. Zwykłych, rutynowych czynności nie trzeba zapisywać.
 
 ## Szablon wpisu
 
-### [ID] Krótki opis problemu
+### Objaw
+Co dokładnie nie działało i w jakich warunkach?
 
-- **Objaw:**
-- **Warunki wystąpienia:**
-- **Hipotezy:**
-- **Testy diagnostyczne:**
-- **Przyczyna potwierdzona:**
-- **Rozwiązanie:**
-- **Jak zapobiec powtórzeniu:**
-- **Powiązany test / commit:**
+### Dowody
+Log, komunikat błędu, schemat, pomiar lub powtarzalny test. Nie zapisuj niepotwierdzonych przypuszczeń jako faktów.
 
-## Zarejestrowane problemy
+### Przyczyna
+Ustalona przyczyna lub lista hipotez, jeśli diagnoza nie jest jeszcze pewna.
 
-Na tym etapie nie zarejestrowano jeszcze problemu dotyczącego docelowego prototypu.
+### Rozwiązanie
+Zmiana sprzętu, połączenia, kodu albo procedury.
+
+### Weryfikacja
+Test potwierdzający rozwiązanie oraz ograniczenia tego testu.
