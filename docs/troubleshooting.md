@@ -1,26 +1,72 @@
-# Rozwiązywanie problemów
+# Troubleshooting — Offline Navigator
 
-Repozytorium zawiera tylko problemy istotne dla firmware, sprzętu lub powtarzalności testów. Proste ćwiczenia edukacyjne nie wymagają osobnych wpisów.
+**Ostatnia aktualizacja:** 2026-10-20
 
-## GPS-001 — NMEA jest odbierane, ale nie ma fixa
+## 1. `FIX=NO` wewnątrz domu
 
-- **Objaw:** NMEA dociera do Arduino, lecz GGA quality wynosi `0`, GSA fix mode `1`, a RMC/GLL status to `V`.
-- **Wynik testu:** w pomieszczeniu użytkownik zaobserwował brak fixa; po przeniesieniu odbiornika na zewnątrz uzyskano fix 3D.
-- **Wniosek:** komunikacja UART może działać, mimo że pozycja GNSS nie jest dostępna. Brak fixa w pomieszczeniu sam w sobie nie dowodzi awarii odbiornika.
-- **Diagnostyka:** otwarta przestrzeń, niezasłonięta antena, obserwacja jakości fixa i satelitów, a potem kontrola połączenia antenowego i dokumentacji płytki.
+**Zaobserwowane:** w teście z 2026-10-19 program wyświetlał kilka razy `FIX=NO | LAT=-- | LON=--`.
 
-## GPS-002 — pozycja waha się przy nieruchomym odbiorniku
+**Interpretacja:** kod wyświetla `FIX=NO`, gdy lokalizacja nie jest uznana za ważną/świeżą albo filtr nie został zainicjalizowany. Sam ten komunikat nie rozróżnia braku fixa od braku odbioru UART.
 
-- **Objaw:** szerokość i długość zmieniają się pomiędzy kolejnymi raportami, mimo że odbiornik został pozostawiony nieruchomo.
-- **Dane:** w przekazanym teście HDOP wynosił ok. 1,49–1,50, liczba satelitów użytych 5–6, a sumy kontrolne NMEA nie wykazywały błędów.
-- **Wniosek:** poprawne sumy kontrolne potwierdzają integralność odebranych zdań, ale nie gwarantują dokładności pozycji. GNSS wykazuje szum i dryf.
-- **Działanie:** zachować surowy pomiar w diagnostyce; używać filtrowania wyłącznie jako wygładzania wskazania; dokładność bezwzględną oceniać względem niezależnego punktu odniesienia.
-- **Ograniczenie filtra:** silniejsze wygładzanie zwiększa opóźnienie podczas marszu. Trzeba przetestować zarówno postój, jak i ruch.
+**Kontekst historyczny:** w teście z etapu 1 również zgłoszono brak fixa wewnątrz pomieszczenia; na zewnątrz uzyskano fix 3D.
 
-## GNSS parser — typowe problemy
+**Nie wolno wnioskować:** że moduł jest zepsuty wyłącznie na podstawie `FIX=NO` wewnątrz budynku.
 
-- Jeśli kompilator zgłasza brak `TinyGPS++.h`, zainstalować `TinyGPSPlus` przez Library Manager.
-- Jeśli nie ma znaków NMEA, sprawdzić GPS TX → Arduino D4, wspólną masę, aktualną konfigurację zasilania i prędkość UART 9600 baud.
-- Monitor portu szeregowego musi być ustawiony na 115200 baud.
-- `FIX=NO` może oznaczać brak świeżej pozycji, nawet jeśli strumień NMEA jest odbierany poprawnie.
-- Nie podłączać Arduino TX do GPS RX, dopóki nie zostaną potwierdzone poziomy logiczne konkretnej płytki GNSS.
+**Decyzja projektu:** użytkownik nie chce dalej testować starego modułu i planuje kupić nowy odbiornik. Nie wracać do powtarzania tego testu, chyba że później pojawi się konkretna potrzeba diagnostyczna.
+
+## 2. Brak komunikatów na Serial Monitorze
+
+Jeżeli taki problem wystąpi w przyszłości, sprawdzić osobno:
+
+1. Czy Serial Monitor jest ustawiony na 115200 baud dla `Serial.begin(115200)`.
+2. Czy `gpsSerial.begin(9600)` odpowiada szybkości wyjściowej nowego odbiornika.
+3. Czy TX odbiornika trafia do RX portu Arduino; np. przy `SoftwareSerial gpsSerial(4, 3)` RX Arduino jest na D4.
+4. Czy urządzenia mają wspólną masę.
+5. Czy zasilanie modułu oraz jego poziomy logiczne odpowiadają dokładnej dokumentacji płytki.
+6. Czy program regularnie opróżnia bufor wejściowy i nie wykonuje długich, blokujących operacji.
+
+To lista możliwych przyczyn, a nie ustalenie, że któraś z nich wystąpiła w tym projekcie.
+
+## 3. Znaki docierają, lecz brak potwierdzonych komunikatów NMEA
+
+W przyszłej diagnostyce interpretować łącznie:
+
+- `gps.charsProcessed()` — liczbę znaków przekazanych parserowi;
+- `gps.passedChecksum()` — liczbę zdań z poprawną sumą kontrolną;
+- `gps.failedChecksum()` — liczbę zdań z niepoprawną sumą kontrolną;
+- `gpsSerial.overflow()` — czy wystąpiło przepełnienie bufora SoftwareSerial (wywołanie odczytuje i czyści flagę przepełnienia w implementacji Arduino AVR).
+
+Jeżeli licznik znaków rośnie, ale liczniki sum kontrolnych pozostają zerowe, nie dowodzi to samo w sobie konkretnej awarii. Możliwe, że nie odebrano jeszcze całego zdania, format jest inny albo parser nie widzi kompletnego komunikatu.
+
+Jeżeli błędy sum kontrolnych rosną, możliwe przyczyny to utrata/zmiana znaków, niewłaściwa szybkość transmisji albo zakłócenia. Sam licznik nie identyfikuje przyczyny.
+
+Dokumentacja:
+- TinyGPSPlus API: https://github.com/mikalhart/TinyGPSPlus/blob/master/src/TinyGPS%2B%2B.h
+- TinyGPSPlus parser: https://github.com/mikalhart/TinyGPSPlus/blob/master/src/TinyGPS%2B%2B.cpp
+- Arduino `SoftwareSerial.overflow()`: https://docs.arduino.cc/learn/built-in-libraries/software-serial/
+
+## 4. Brak fixa a brak transmisji
+
+Nie utożsamiać tych przypadków:
+
+- **Brak fixa:** odbiornik może wysyłać poprawne NMEA, ale komunikaty wskazują brak ważnej pozycji.
+- **Brak transmisji:** Arduino nie otrzymuje znaków albo nie przekazuje ich parserowi.
+- **Niepoprawne zdania:** znaki są odbierane, ale komunikaty nie przechodzą kontroli sumy lub nie mają oczekiwanego formatu.
+- **Pozycja stara:** parser zachował ostatnią poprawną lokalizację, lecz jej wiek przekracza przyjęty próg.
+
+## 5. Filtr pozycji
+
+Obecny prototyp stosuje filtr wykładniczy z `FILTER_ALPHA=0.25`. Wygładza on zmiany kolejnych współrzędnych, ale nie zwiększa automatycznie dokładności bezwzględnej. Może opóźniać pozycję podczas ruchu. Po przerwie, gdy pozycja przestaje być świeża, program wyzerowuje flagę `filterInitialized`, żeby kolejną zaakceptowaną pozycję wykorzystać jako nowy punkt startowy filtra.
+
+## 6. Bezpieczeństwo nowego modułu i PCB
+
+Nie podłączać nowej płytki wyłącznie na podstawie nazwy odbiornika GNSS. Weryfikować osobno:
+
+- zakres zasilania VCC płytki;
+- logikę napięć TX/RX;
+- czy płytka ma regulator i konwerter poziomów;
+- dopuszczalne napięcie na RX odbiornika;
+- pobór prądu i antenę;
+- pinout konkretnego wariantu.
+
+Wcześniejsze użycie 5 V zostało zgłoszone przez użytkownika, ale napięcie przy module nie zostało zapisane jako pomiar. Zgodność z dokumentacją podobnej płytki Waveshare nie jest dowodem identyczności klona.

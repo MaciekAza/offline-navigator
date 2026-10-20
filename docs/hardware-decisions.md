@@ -1,47 +1,74 @@
-# Rejestr decyzji sprzętowych
+# Decyzje sprzętowe — Offline Navigator
 
-Ten dokument zawiera decyzje wpływające na architekturę urządzenia, nie dziennik codziennych ćwiczeń.
+**Ostatnia aktualizacja:** 2026-10-20  
+**Etap:** 2/9 — odbiornik GPS, UART i NMEA
 
-## HD-001 — Arduino UNO jako platforma eksperymentalna
+## Status i poziom pewności
 
-**Status:** przyjęta tymczasowo.
+W tym dokumencie rozróżniamy:
+- **Potwierdzone w logu** — istnieje rzeczywisty wynik lub log z testu.
+- **Zgłoszone przez użytkownika** — informacja podana przez użytkownika, bez niezależnego pomiaru.
+- **Zgodne z dokumentacją podobnej płytki** — dane producenta odpowiadającej konstrukcji, ale nie dowód tożsamości egzemplarza.
+- **Niezweryfikowane** — nie ma wystarczających danych.
 
-**Decyzja:** używać posiadanego UNO do testów GPIO, UART, peryferiów i podstaw firmware. Nie uznawać go za docelowy kontroler map offline.
+## 1. Płytka GPS
 
-**Uzasadnienie:** ATmega328P w UNO R3 ma 32 KB Flash i 2 KB SRAM, co jest poważnym ograniczeniem przy renderowaniu map i buforowaniu danych. Ostateczny wybór musi wynikać z formatu map, ekranu, interfejsów i budżetu energetycznego.
+- **Oznaczenie odbiornika widoczne na zdjęciu:** `NEO-7M-0-000 COMPATIBLE`.
+- **Oznaczenia płytki widoczne na zdjęciu:** `WaveShare` oraz `NEO-6M/7M GPS` (odczyt ze zdjęć przekazanych w rozmowie).
+- **Opis pinów:** `VCC`, `GND`, `TX`, `RX`, `PPS`.
+- **Antena:** zewnętrzny element antenowy połączony przewodem; dokładny model anteny nieustalony.
+- **Identyfikacja:** konstrukcja wygląda na zgodną z rodziną Waveshare UART GPS NEO-7M-C (B), ale producent, oryginalność, rewizja PCB i dokładny wariant odbiornika pozostają **niezweryfikowane**.
+- **Decyzja użytkownika:** obecny moduł nie będzie dalej testowany; użytkownik planuje kupić nowy odbiornik do docelowej płytki.
 
-**Dokumentacja:** [Arduino UNO R3 — oficjalna specyfikacja](https://docs.arduino.cc/hardware/uno-rev3/).
+Oficjalna dokumentacja odpowiadającej płytki Waveshare podaje zasilanie VCC 2,7–5,0 V, deklarowaną zgodność TTL z systemami 3,3 V i 5 V, transmisję 9600 baud oraz prąd roboczy 35 mA. Są to dane **dla udokumentowanej płytki Waveshare**, a nie potwierdzone parametry konkretnego egzemplarza: https://www.waveshare.com/wiki/UART_GPS_NEO-7M-C oraz https://www.waveshare.com/uart-gps-neo-7m-c-b.htm.
 
-## HD-002 — obecny moduł GNSS jest platformą do testów, nie finalnym wyborem
+Karta katalogowa samego modułu u-blox NEO-7M podaje VCC 1,65–3,6 V: https://content.u-blox.com/sites/default/files/products/documents/NEO-7_DataSheet_%28UBX-13003830%29.pdf. Nie wolno utożsamiać wymagań samego układu z możliwościami płytki nośnej. Również nie wolno automatycznie przenosić danych płytki Waveshare na dowolną płytkę „compatible”.
 
-**Status:** tymczasowo przyjęta.
+## 2. Zasilanie i poziomy logiczne
 
-**Potwierdzone z opisu i testów:** odbiornik na płytce oznaczonej `NEO-7M-0-000 compatible`; wyprowadzenia opisane jako PPS/RX/TX/GND/VCC; Arduino odbiera NMEA z GPS TX podłączonego do D4.
+- **Zgłoszone przez użytkownika:** w poprzednim teście moduł był zasilany z pinu 5V Arduino UNO.
+- **Rzeczywisty pomiar napięcia na VCC:** nie wykonano lub nie zapisano.
+- **Tolerancja wejścia RX konkretnej płytki:** niezweryfikowana.
+- **Dokładna topologia regulatora i konwerterów poziomów:** niezweryfikowana.
+- W testach odbiorczych pin GPS RX nie był używany, a zatem Arduino nie wysyłało danych do wejścia RX modułu.
 
-**Niepotwierdzone:** dokładna wersja płytki pośredniczącej, model i typ anteny, zakres wejścia VCC całej płytki oraz odporność RX na poziom 5 V. W testach zachowano działającą konfigurację zasilania, ale nie wolno na tej podstawie automatycznie przenosić tego połączenia na inną płytkę.
+**Decyzja projektowa:** przed podłączeniem nowego modułu oraz przed zaprojektowaniem PCB sprawdzić dokumentację dokładnego modułu/breakout boardu, zakres VCC, napięcia logiczne TX/RX, pobór prądu i wymagania anteny. Nie opierać projektu PCB tylko na nazwie układu odbiornika.
 
-**Wyniki:** fix 3D uzyskano na otwartej przestrzeni. Późniejsze próbki raportowały 5–6 satelitów użytych i HDOP ok. 1,49–1,50. Dokładność bezwzględna nie została zmierzona.
+## 3. Połączenia używane w prototypie
 
-**Decyzja:** korzystać z NEO-7M w prototypie do nauki UART/NMEA; przed finalną PCB porównać współczesne wielokonstelacyjne odbiorniki, anteny, wymagania zasilania, pobór energii i dostępność dokumentacji.
+Opis konfiguracji z wcześniejszych testów, nie zalecenie do niezweryfikowanego nowego modułu:
 
-**Dokumentacja:** [u-blox NEO-7 series](https://www.u-blox.com/en/product/neo-7-series), [u-blox M10 series](https://www.u-blox.com/en/product/ubx-m10-series).
+```text
+GPS TX  -> Arduino UNO D4 (SoftwareSerial RX)
+GPS GND -> Arduino UNO GND
+GPS VCC -> Arduino UNO 5V (użytkownik zgłosił użycie w poprzednim teście)
+GPS RX  -> niepodłączony
+GPS PPS -> niepodłączony
+Arduino D3 (SoftwareSerial TX) -> niepodłączony do GPS
+```
 
-## HD-003 — odbiór w trudnych warunkach
+TX i RX są nazwane z perspektywy urządzenia, na którym znajduje się dany pin: nadajnik GPS TX wysyła do wejścia odbiorczego Arduino RX. Wspólna masa daje wspólny punkt odniesienia dla poziomów napięć.
 
-**Status:** wymaganie projektowe przyjęte; realizacja sprzętowa otwarta.
+## 4. UART w prototypie
 
-**Wymaganie:** maksymalizować dostępność i stabilność pozycji w gęstym lesie oraz w pobliżu budynków. Nie gwarantujemy fixa wewnątrz dowolnego budynku ani pod każdą koroną drzew.
+- GPS UART: `9600 baud`.
+- USB/Monitor portu szeregowego Arduino: `115200 baud`.
+- `SoftwareSerial gpsSerial(4, 3)` — D4 jest RX Arduino, D3 jest TX Arduino.
+- `Serial` korzysta ze sprzętowego UART ATmega328P połączonego z interfejsem USB-serial na typowym UNO R3.
+- GPS używa `SoftwareSerial`, żeby nie zajmować D0/RX i D1/TX sprzętowego UART wykorzystywanego do komunikacji z komputerem.
+- Domyślna konfiguracja ramki jest typowo 8N1, ale szczegółowe ustawienie parzystości/liczby bitów/bitów stopu nie zostało oddzielnie zapisane jako pomiar lub wynik testu.
 
-**Kierunek:** porównać nowoczesny odbiornik wielokonstelacyjny, właściwą antenę/umiejscowienie i zakłócenia generowane przez resztę płytki. UI powinien jawnie sygnalizować brak aktualnej pozycji. Kompas/IMU można ocenić jako pomocniczy fallback, z narastającą niepewnością.
+## 5. Nowy odbiornik — kryteria przed zakupem i PCB
 
-## HD-004 — ekran pozostaje niezdecydowany
+Przed ostatecznym wyborem porównać i udokumentować:
 
-**Status:** otwarta.
+1. dokładny model odbiornika i płytki nośnej;
+2. obsługiwane systemy GNSS i pasma częstotliwości;
+3. dostępność aktywnej anteny, typ złącza i wymagania jej zasilania;
+4. napięcie VCC oraz pobór prądu w trybie pracy i rozruchu;
+5. poziomy logiczne UART TX/RX i to, czy potrzebny jest konwerter;
+6. domyślne baud rate, format wyjściowy, częstotliwość aktualizacji i możliwość konfiguracji;
+7. zachowanie w warunkach leśnych i przy budynkach — wymagane do późniejszego porównania testowego, bez obietnicy fixa w każdych warunkach;
+8. dostęp do dokumentacji producenta i trwałą kopię datasheetu w repozytorium projektu.
 
-Dostępne LCD 16×2 i Grove RGB można wykorzystać do komunikatów diagnostycznych, ale nie zostały wybrane jako ekran mapy. Wybór finalny zależy od widoczności w słońcu, rozdzielczości, interfejsu, sterownika, pamięci i poboru mocy.
-
-## HD-005 — zasilanie i microSD bez decyzji zakupowej
-
-**Status:** otwarta.
-
-Przed wyborem akumulatora trzeba zmierzyć/ oszacować pobór prądu bloków, ustalić wymagany czas pracy, napięcia i układ ładowania/ochrony. Czytnik microSD nie został jeszcze potwierdzony; dodatkowe elementy kupować dopiero po zdefiniowaniu wymagań.
+Wybór konkretnego nowego odbiornika pozostaje **niezrealizowany**.
