@@ -1,11 +1,8 @@
 # Offline Navigator
 
 Projekt przenośnej nawigacji GNSS działającej bez internetu. Docelowo urządzenie ma wyświetlać lokalne mapy OpenStreetMap, pokazywać bieżącą pozycję, zapisywać punkty i ślady, obsługiwać ekran i przyciski oraz pracować z akumulatora. Projekt obejmuje również własny schemat i PCB w KiCad.
-
 > **Status:** wczesny prototyp. Potwierdzono odbiór NMEA przez Arduino UNO R3 i uzyskanie autonomicznego fixa 3D na otwartej przestrzeni. Powstał szkic firmware używający TinyGPSPlus oraz prostego filtra współrzędnych. Nawigacja po mapie, zapis śladów, docelowe zasilanie i PCB nie są jeszcze zaimplementowane.
-
 ## Główne osiągnięcia
-
 - [x] Uruchomiono odbiór NMEA z obecnego modułu GNSS przez UART/SoftwareSerial.
 - [x] Odebrano poprawne komunikaty NMEA i potwierdzono autonomiczny fix 3D na zewnątrz.
 - [x] Odczytano dane GPS przez bibliotekę TinyGPSPlus.
@@ -16,7 +13,6 @@ Projekt przenośnej nawigacji GNSS działającej bez internetu. Docelowo urządz
 - [ ] Dodać odczyt lokalnych map, interfejs użytkownika oraz zapis punktów i śladów.
 - [ ] Opracować budżet energetyczny i układ zasilania akumulatorowego.
 - [ ] Zaprojektować schemat i PCB w KiCad, następnie wykonać testy prototypu.
-
 ## Aktualna platforma testowa
 
 - Arduino UNO R3 z ATmega328P-PU.
@@ -24,17 +20,14 @@ Projekt przenośnej nawigacji GNSS działającej bez internetu. Docelowo urządz
 - W testowanej konfiguracji: GPS TX → Arduino D4, wspólna masa, GPS UART 9600 baud, Monitor portu szeregowego 115200 baud.
 - GPS RX i PPS pozostają niepodłączone w teście odbioru.
 - Biblioteka firmware: TinyGPSPlus; SoftwareSerial jest używany do odbioru GPS.
-
 UNO jest platformą prototypową, a nie zatwierdzonym kontrolerem finalnym. ATmega328P ma ograniczoną pamięć, więc wybór docelowej platformy wymaga określenia formatu map, rozdzielczości ekranu, RAM/Flash i budżetu energii.
-
 ## Założenie dotyczące odbioru w trudnych warunkach
 
 Wymaganiem projektu jest możliwie dobra dostępność pozycji w gęstym lesie i w pobliżu budynków. Nie zakładamy, że GNSS zawsze uzyska fix wewnątrz budynku. Docelowo ocenimy nowocześniejszy odbiornik wielokonstelacyjny, antenę i jej umiejscowienie oraz zachowanie interfejsu po utracie fixa. Kompas/IMU mogą być rozważone jako pomocnicze źródła danych, z jawnym oznaczeniem narastającej niepewności.
-
 ## Struktura repozytorium
-
 - `firmware/gnss_parser/` — parser GNSS i zwięzły raport pozycji.
 - `firmware/diagnostics/gps_uart_raw/` — minimalny szkic diagnostyczny do przepuszczania surowych komunikatów NMEA.
+- `firmware/experiments/` — małe eksperymenty edukacyjne na ATmega328P (GPIO, przyciski, timery i przerwania); nie są firmware finalnej nawigacji.
 - `hardware/schematics/` — schematy elektroniczne.
 - `hardware/pcb/` — projekt PCB.
 - `hardware/datasheets/` — dokumentacja elementów.
@@ -43,8 +36,10 @@ Wymaganiem projektu jest możliwie dobra dostępność pozycji w gęstym lesie i
 - `docs/hardware-decisions.md` — istotne decyzje sprzętowe.
 - `docs/test-results.md` — wyniki testów bloków urządzenia.
 - `docs/troubleshooting.md` — problemy wpływające na projekt i ich rozwiązania.
+- `docs/gpio-register-masks-atmega328p.md` — notatki o DDRB/PORTB/PINB i maskach bitowych.
+- `docs/external-interrupts-int0-atmega328p.md` — eksperyment z przerwaniem zewnętrznym INT0.
+- `docs/timers-atmega328p.md` — eksperymenty z Timer1, CTC i współdzieleniem danych z ISR.
 - `tools/map-preparation/` — przyszłe narzędzia do przygotowania map offline.
-
 ## Firmware — uruchomienie
 
 1. Otwórz `firmware/gnss_parser/gnss_parser.ino` w Arduino IDE.
@@ -52,9 +47,11 @@ Wymaganiem projektu jest możliwie dobra dostępność pozycji w gęstym lesie i
 3. Wybierz Arduino Uno i właściwy port COM.
 4. Skompiluj (Verify), wgraj (Upload) i otwórz Serial Monitor na `115200 baud`.
 5. Zachowaj obecną, sprawdzoną konfigurację zasilania modułu GPS; dokładny wariant płytki pośredniczącej i jej parametry elektryczne nadal wymagają niezależnej weryfikacji.
-
 Raport pokazuje tylko `FIX`, `LAT` i `LON`. `FIX=YES` znaczy, że parser ma poprawną pozycję nie starszą niż trzy sekundy; **nie jest gwarancją określonej dokładności w metrach**. Współrzędne są prywatnymi danymi lokalizacyjnymi — nie publikuj w repozytorium surowych logów z dokładną lokalizacją domu lub innych wrażliwych miejsc.
 
+### Eksperymenty ATmega328P
+
+Szkice z `firmware/experiments/` są oddzielnymi programami edukacyjnymi. Otwieraj i wgrywaj pojedynczy szkic naraz. Nie łącz ich automatycznie z firmware GNSS. Eksperymenty konfigurujące Timer1 przejmują ten timer i mogą kolidować z bibliotekami korzystającymi z Timer1 (np. Servo) oraz z PWM na D9/D10. Szczegóły połączeń i status potwierdzenia znajdują się w komentarzach szkiców oraz dokumentacji `docs/`.
 ## Zasada portfolio
 
 Repozytorium nie jest dziennikiem każdej lekcji. Dokumentujemy funkcjonalne kamienie milowe, istotne decyzje, schematy, firmware i testy, które potwierdzają działanie urządzenia. Wyniki wpisujemy jako rzeczywiste tylko wtedy, gdy wynikają z faktycznego testu.

@@ -1,58 +1,31 @@
 # ATmega328P GPIO: DDRB, PORTB i maski bitowe
 
-**Kontekst:** Offline Navigator — materiał referencyjny etapu 3/9  
-**Platforma:** Arduino UNO R3 / ATmega328P  
-**Status:** teoria sprawdzona w ćwiczeniach; uruchomienie GPIO na fizycznej płytce nie zostało jeszcze potwierdzone.
+**Kontekst:** Offline Navigator — eksperymenty etapu 3/9  
+**Platforma:** Arduino UNO R3 / ATmega328P
 
-## Rola rejestrów
+## Mapowanie użyte w ćwiczeniach
 
-- `DDRB`: kierunek pinów portu B. Bit `1` konfiguruje odpowiedni pin jako wyjście, bit `0` jako wejście.
-- `PORTB`: dla pinu skonfigurowanego jako wyjście ustawia stan niski/wysoki. Dla wejścia może sterować wewnętrznym rezystorem podciągającym.
-- `PINB`: odczytuje fizyczne stany pinów portu B.
-- Na Arduino UNO R3 pin D13 mapuje się na PB5.
+- Arduino D12 = ATmega328P PB4.
+- Arduino D13 = ATmega328P PB5 (wbudowana LED na typowym UNO R3).
+- Arduino D4 = ATmega328P PD4 — to nie jest PB4.
+- Arduino D2 = ATmega328P PD2 / INT0.
 
-## Co robi `|=`?
+Numer Arduino i numer bitu portu AVR to różne oznaczenia. D12 jest bitem 4 portu B, nie bitem 12.
+
+## Rejestry
+
+- `DDRB`: kierunek pinów portu B; bit `1` = wyjście, bit `0` = wejście.
+- `PORTB`: dla wyjścia ustala LOW/HIGH; dla wejścia bit `1` włącza wewnętrzny pull-up.
+- `PINB`: odczytuje fizyczny stan pinów portu B.
+- Analogicznie dla portu D używa się `DDRD`, `PORTD` i `PIND`.
+
+## `|=` i `_BV()`
 
 ```cpp
 DDRB |= _BV(DDB5);
 ```
 
-`_BV(DDB5)` tworzy maskę z ustawionym wyłącznie bitem 5, czyli `00100000`. Operator `|=` wykonuje OR z obecną wartością rejestru i zapisuje wynik. Pozwala ustawić wskazany bit bez kasowania pozostałych bitów.
-
-```text
-  00000000
-| 00100000
-----------
-  00100000
-```
-
-Następnie:
-
-```cpp
-PORTB |= _BV(PORTB5);
-```
-
-ustawia bit 5 rejestru `PORTB`. Jeżeli `DDRB5` jest już ustawiony na 1, pin PB5 jest wyjściem i przechodzi w stan wysoki — w typowym Arduino UNO powoduje to zaświecenie wbudowanej diody D13.
-
-Pierwsza instrukcja wybiera tryb pinu (wejście/wyjście); druga ustawia stan wyjścia. Nie są to dwa polecenia zapalające LED.
-
-## Przykład sprawdzony w ćwiczeniu obliczeniowym
-
-Stan początkowy:
-
-```text
-DDRB  = 00100000
-PORTB = 00100000
-```
-
-Kod:
-
-```cpp
-DDRB |= _BV(DDB2);
-PORTB |= _BV(PORTB2);
-```
-
-Maska bitu 2 wynosi `00000100`. Zastosowanie OR:
+`_BV(DDB5)` tworzy maskę `00100000`. Operator `|=` jest równoważny `DDRB = DDRB | maska`; ustawia bit 5 i zachowuje pozostałe bity.
 
 ```text
   00100000
@@ -61,24 +34,27 @@ Maska bitu 2 wynosi `00000100`. Zastosowanie OR:
   00100100
 ```
 
-Wyniki końcowe:
+Przykład sprawdzony w zadaniu rachunkowym:
 
-- `DDRB = 00100100`
-- `PORTB = 00100100`
-- Bit 5 pozostał ustawiony na 1, ponieważ OR z maską bitu 2 nie kasuje bitu 5.
+```cpp
+DDRB  = 00100000;
+PORTB = 00100000;
+DDRB |= _BV(DDB2);
+PORTB |= _BV(PORTB2);
+```
 
-Użytkownik poprawnie podał oba rejestry oraz uzasadnił, że bit 5 pozostaje ustawiony, bo `|=` nie nadpisuje całego rejestru zerami/nową maską.
+Wynik: `DDRB = 00100100`, `PORTB = 00100100`. Bit 5 pozostaje ustawiony, bo OR z maską bitu 2 go nie kasuje.
 
-## Kasowanie pojedynczego bitu
-
-Aby wyzerować wybrany bit bez zmiany pozostałych, można użyć:
+Aby wyzerować wyłącznie bit 5:
 
 ```cpp
 PORTB &= ~_BV(PORTB5);
 ```
 
-`~` odwraca maskę, a `&=` zachowuje wszystkie bity poza wskazanym bitem, który zostaje wyzerowany.
+## Potwierdzone ćwiczenia
 
-## Ważne rozróżnienie statusu
+- Użytkownik potwierdził miganie wbudowanej LED D13 sterowanej bezpośrednio przez `DDRB` i `PORTB`.
+- Użytkownik używał przycisku na D12/PB4 z wewnętrznym pull-up.
+- Użytkownik potwierdził działanie programowego debounce opartego na `millis()` i progu 30 ms.
 
-Poprawne rozwiązanie obliczenia binarnego potwierdza rozumienie konkretnej operacji logicznej. Nie jest dowodem na to, że kod skompilował się lub został wgrany na Arduino. Fizyczny test LED należy oznaczyć jako wykonany dopiero po potwierdzeniu przez użytkownika.
+Rozwiązanie rachunkowe potwierdza rozumienie masek; nie jest samo w sobie dowodem testu sprzętowego.

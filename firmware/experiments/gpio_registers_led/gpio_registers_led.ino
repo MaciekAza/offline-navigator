@@ -1,20 +1,19 @@
-// Offline Navigator — educational GPIO experiment
-// Board: Arduino UNO R3 / ATmega328P
-// D13 on UNO maps to PB5 on ATmega328P.
-// Status: example prepared for testing; hardware execution has not yet been confirmed.
+// Offline Navigator — edukacyjny eksperyment GPIO
+// Arduino UNO R3 / ATmega328P
+// D13 na UNO mapuje się na PB5.
+// Status: użytkownik potwierdził, że wgrany szkic migał LED D13.
 
 void setup() {
-    // Set DDRB bit 5: configure PB5/D13 as an output.
-    // |= sets this bit without changing other DDRB bits.
+    // Ustaw bit 5 w DDRB: PB5/D13 staje się wyjściem.
     DDRB |= _BV(DDB5);
 }
 
 void loop() {
-    // Set PORTB bit 5 high: the built-in LED on D13 should turn on.
+    // Ustaw PB5 w stan wysoki — LED D13 świeci.
     PORTB |= _BV(PORTB5);
     delay(500);
 
-    // Clear only PORTB bit 5; preserve all other PORTB bits.
+    // Wyzeruj tylko bit 5, zachowując pozostałe bity PORTB.
     PORTB &= ~_BV(PORTB5);
     delay(500);
 }
